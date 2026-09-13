@@ -1,0 +1,21 @@
+name: Published update verification
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/published-update.yml'
+      - 'scripts/check-published-update.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-feed:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve verified Sparkle framework
+        run: swift package resolve
+      - name: Build official test driver
+        run: python3 scripts/build-update-test-driver.py
+      - name: Probe public release without installing it
+        run: python3 scripts/check-published-update.py
