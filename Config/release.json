@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "build": "10000",
+  "repository": "galilei13/Clipboard",
+  "feedURL": "https://github.com/galilei13/Clipboard/releases/latest/download/appcast.xml",
+  "publicEDKey": "NJ3VdkI/cXvbXHqsVc2Idksv6gMQbchCehZMxuemej4=",
+  "keychainAccount": "local.clipboard.app.sparkle"
+}

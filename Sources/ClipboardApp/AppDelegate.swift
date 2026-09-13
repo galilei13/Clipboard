@@ -26,6 +26,7 @@ final class ClipboardPanel: NSPanel {
     private var maintenance: Timer?
     private var previousApp: NSRunningApplication?
     private var testing = false
+    private var updates: UpdateController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -81,7 +82,10 @@ final class ClipboardPanel: NSPanel {
         reader.onCapture = { [weak self] capture in await self?.model.capture(capture) }
         reader.onError = { [weak self] message in self?.model.error = message }
         reader.onAccess = { [weak self] denied in if self?.model.accessDenied != denied { self?.model.accessDenied = denied } }
-        if !testing { reader.start() }
+        if !testing {
+            reader.start()
+            updates = UpdateController(model: model, beforeShowingUpdate: { [weak self] in self?.closePanel() })
+        }
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self else { return event }; return self.handle(event)
         }
