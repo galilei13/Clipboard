@@ -1,15 +1,15 @@
 # Clipboard for macOS
 
-A native menu bar clipboard history app. **0.1.0 is a local preview release**, intended for daily testing and bug fixes before version 1.0.
+A native menu bar clipboard history app. **1.0.0 is the first official release**, with signed in-app updates via Sparkle.
 
 ## Run
 
 1. Open `dist/Clipboard.app`. For regular use, drag the app to your Applications folder and run that copy.
 2. Look for the clipboard icon in the menu bar. Click it or press **⌘⇧V**.
 3. Copy some text, a link or an image in another app. Clipboard records new copies while it is running.
-4. Choose an item and use **Copy** or **Paste**. The dropdown next to Paste offers **Paste without formatting** for text and links.
+4. Choose an item and press **Return**, or right-click it for **Copy**, **Paste**, **Paste without formatting**, pinning and deletion.
 
-This preview is built for Apple Silicon. Its deployment target is macOS 13+, but runtime validation so far is on macOS 26.5.2. Compatibility with older macOS releases and Intel Macs has not been tested.
+The downloadable release is built for Apple Silicon. Its deployment target is macOS 13+, but runtime validation so far is on macOS 26.5.2. Compatibility with older macOS releases and Intel Macs has not been tested.
 
 ## System permissions
 
@@ -25,7 +25,7 @@ This preview is built for Apple Silicon. Its deployment target is macOS 13+, but
 - Copying a pinned item refreshes the copy time but does not extend its pin.
 - When a pin expires or is removed, the item returns to Recent if its latest copy is within the selected retention period (or retention is Forever). Otherwise it is deleted from the app's history and managed storage.
 - Search applies to text and links in the selected collection. Images do not have OCR search.
-- The app has no pause switch, app exclusions, pin names, cloud sync, or network service.
+- The app has no pause switch, app exclusions, pin names, cloud sync, or clipboard-sharing network service.
 
 ## Keyboard
 
@@ -33,10 +33,11 @@ This preview is built for Apple Silicon. Its deployment target is macOS 13+, but
 | --- | --- |
 | ⌘⇧V | Toggle Clipboard; configurable in Settings |
 | ↑ / ↓ | Select an item |
-| Enter | Paste the selected item into the previously active app |
-| ⇧Enter | Paste text or a link without formatting |
+| Enter | Paste the selected item, or copy when Auto paste is off |
+| ⇧Enter | Reuse text or a link without formatting, respecting Auto paste |
 | ⌘C | Copy the selected item when not editing/selecting text |
-| ⌘1–⌘9 | Paste one of the first nine current results |
+| ⌘1–⌘9 | Reuse one of the first nine current results, respecting Auto paste |
+| Tab / ⇧Tab | Switch Recent/Pinned and keep typing directed to search |
 | Space | Toggle preview when focus is on the list |
 | ⌘F | Focus search |
 | Escape | Close preview/settings, then the panel |
@@ -53,7 +54,7 @@ Appearance and paste preferences use the `local.clipboard.app` preferences domai
 
 ## Build and check
 
-Requires Apple's Swift command-line tools and the macOS SDK. No third-party packages are downloaded.
+Requires Apple's Swift tools and the macOS 26 SDK (Xcode 26 or equivalent Command Line Tools). Swift Package Manager downloads the official Sparkle 2.9.6 binary and verifies its pinned checksum.
 
 ```sh
 bash scripts/check.sh
@@ -63,7 +64,7 @@ open dist/Clipboard.app
 
 `scripts/check.sh` builds and runs a standalone Swift verification executable; a full Xcode installation and XCTest are not required. The pasteboard integration checks use uniquely named, isolated pasteboards and do not alter the user's general clipboard. They need normal access to macOS pasteboard services, so restrictive agent sandboxes may require approval.
 
-The build script produces an ad-hoc signed local `.app` and its app icon. It does not install the app or publish anything. The signing identity is for local preview builds; Developer ID signing and notarization are part of the future public-release work.
+The build script produces an ad-hoc signed `.app`, embeds Sparkle and writes version/update metadata from `Config/release.json`. It does not publish automatically. Developer ID signing and notarization are not configured for this release.
 
 An optional UI test mode uses a separate sample history and disables the real clipboard reader:
 
@@ -73,7 +74,7 @@ open -n dist/Clipboard.app --args --demo
 
 Quit the running app before switching between sample and normal mode. Sample mode uses the `local.clipboard.demo` preferences domain and a separate temporary data directory. Normal mode contains no seeded examples.
 
-## Preview limitations and validation
+## Limitations and validation
 
 See [VALIDATION.md](VALIDATION.md) for exactly what was checked. In particular, a complete direct-paste round trip with Accessibility enabled and an actual logout/login cycle require user/system interaction; implementation is not the same as verified behavior in those cases.
 
@@ -81,11 +82,13 @@ Clipboard observes the current pasteboard every 250 ms. macOS does not expose th
 
 ## Roadmap and license
 
-Development stays in **0.x** while we test and fix bugs. After the stable **1.0.0** milestone, the project and downloadable app will be published on GitHub with a `v1.0.0` release. There is no GitHub publication yet.
+Version **1.0.0** is published through [GitHub Releases](https://github.com/galilei13/Clipboard/releases). Development follows Git Flow (`main`, `develop`, `release/…`, `feature/…`, `hotfix/…`). See [RELEASE_PROCESS.md](RELEASE_PROCESS.md) for the repeatable release procedure.
 
-**Update roadmap (agreed September 9, 2026):** Set up GitHub Releases plus Sparkle during final preparation for the official 1.0.0 release, before shipping that build. Include the appcast, update signing, and end-to-end update verification. Defer this work during the current local 0.x testing cycle.
+At each app launch, Sparkle checks for a newer release while respecting its saved automatic-check preference. A new version is offered to the user; accepting it starts download and installation. **Check for Updates…** in Settings performs a manual check. The app archive is verified against the embedded Ed25519 public key before extraction. The private key stays in the release Mac's Keychain. No clipboard content is sent to the update server.
 
-**License: undecided.** We will select it together before public release. No default license has been applied.
+The initial release is ad-hoc signed and **not notarized**. Sparkle archive signatures protect updates but do not replace Apple's Developer ID signing or remove first-launch Gatekeeper warnings. Install the app in Applications before using updates.
+
+**License: undecided.** No open-source license has been granted for Clipboard. Third-party notices for Sparkle are in THIRD_PARTY_NOTICES.md.
 
 The detailed agreed plan is in [PLAN.md](PLAN.md).
 
@@ -95,7 +98,7 @@ The three leading switches control Open at login, Auto paste, and Paste as plain
 
 The theme control uses native Liquid Glass on macOS 26 and later, with a segmented control on earlier supported systems. The bottom status text and Settings footer have been removed; Settings has a single Done button in its header.
 
-The main view has no bottom Copy/Paste toolbar. Use Return, Command-number shortcuts, or an item's context menu. Settings shows the bundle version and Check for Updates beneath History, with Quit at the bottom. This local preview has no published update source: Check for Updates explains that online checking is not available yet; it does not claim the app is up to date.
+The main view has no bottom Copy/Paste toolbar. Use Return, Command-number shortcuts, or an item's context menu. Settings shows the bundle version and Check for Updates beneath History, with Quit at the bottom. Check for Updates uses the same Sparkle feed as launch-time checks.
 
 Recent/Pinned uses an equal-width Liquid Glass selector on macOS 26+. Right-click any card to pin it for a chosen duration or delete it; pinned cards also offer Unpin. These actions no longer occupy buttons beside the preview.
 

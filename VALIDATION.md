@@ -1,3 +1,16 @@
+# Release 1.0.0 validation — September 13, 2026
+
+- Production app built with Sparkle 2.9.6. Bundle version is 1.0.0 (build 10000); nested code signature verification passed.
+- All 28 history/platform checks passed.
+- Generated release ZIP and appcast with Sparkle's official tools, verified the Ed25519 archive signature, version, download URL, file size, and produced SHA-256 checksums.
+- Built the official Sparkle command-line driver from pinned 2.9.6 sources and tested disposable bundles with a separate identifier against a loopback feed: newer update discovery, full download and installation, installed-version/signature checks, and correct no-update result all passed.
+- Modified an archive byte and retried: Sparkle rejected it with error 4005; the old disposable application remained intact.
+- Private update key is stored in the login Keychain, account `local.clipboard.app.sparkle`. Only the public key is committed.
+- The real user's app/history were not replaced by integration tests. The standard graphical updater dialog was not manually operated in this session; install mechanics were verified by the official driver.
+- This first release is ad-hoc signed, not Developer ID signed or notarized. Apple Silicon was tested; Intel and older macOS runtime compatibility are not claimed.
+
+## Historical preview validation
+
 # Validation — 0.1.0
 
 Environment: Apple Silicon, macOS 26.5.2, Apple Swift 6.3.3 command-line tools.

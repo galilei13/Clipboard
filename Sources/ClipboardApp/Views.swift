@@ -8,7 +8,6 @@ struct ClipboardView: View {
     @ObservedObject var model: AppModel
     @FocusState private var searchFocused: Bool
     @State private var confirmClear = false
-    @State private var showUpdateStatus = false
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 10) {
@@ -46,11 +45,6 @@ struct ClipboardView: View {
         .onChange(of: model.searchFocusToken) { _ in searchFocused = true }
         .onChange(of: model.settings) { value in if !value { searchFocused = true } }
         .onChange(of: model.preview) { value in if value { searchFocused = false } }
-        .alert("Updates aren’t available yet", isPresented: $showUpdateStatus) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Clipboard \(appVersion) is a local preview. Online update checking will be available when public releases begin.")
-        }
         .confirmationDialog("Clear recent history?", isPresented: $confirmClear, titleVisibility: .visible) {
             Button("Clear recent history", role: .destructive) { model.clearRecent() }
             Button("Cancel", role: .cancel) {}
@@ -199,8 +193,8 @@ struct ClipboardView: View {
                 HStack {
                     Text("Version \(appVersion)").font(.caption).foregroundStyle(.secondary)
                     Spacer()
-                    Button("Check for Updates…") { showUpdateStatus = true }
-                        .controlSize(.small)
+                    Button("Check for Updates…") { model.onCheckForUpdates?() }
+                        .controlSize(.small).disabled(!model.canCheckForUpdates)
                 }
             }.padding(.horizontal, 18).padding(.bottom, 12)
         }.frame(maxHeight: .infinity)

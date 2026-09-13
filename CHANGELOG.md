@@ -1,3 +1,11 @@
+# Version 1.0.0 — September 12, 2026
+
+- First official release of the native clipboard history app.
+- Sparkle 2.9.6 integration with a background check at every launch and manual checks in Settings.
+- User-approved download/install of Ed25519-signed update archives; GitHub Releases-hosted appcast.
+- Git Flow release branches, reproducible packaging, archive checksums and automated build checks.
+- Includes all preview improvements documented below.
+
 # Changelog
 
 ## 0.1.0 — Local preview
