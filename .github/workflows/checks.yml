@@ -1,0 +1,20 @@
+name: Build and checks
+on:
+  push:
+    branches: [main, develop, 'release/**', 'hotfix/**', 'feature/**']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode 26
+        run: |
+          developer_path=$(python3 -c 'import glob; from pathlib import Path; paths=glob.glob("/Applications/Xcode_26*.app"); assert paths, "Xcode 26 is required"; print(sorted(paths)[-1] + "/Contents/Developer")')
+          sudo xcode-select -s "$developer_path"
+      - name: Build application
+        run: swift build --product Clipboard
+      - name: Run checks
+        run: bash scripts/check.sh

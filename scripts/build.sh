@@ -9,24 +9,15 @@ mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Resources"
 cp "$binary_dir/Clipboard" "$bundle/Contents/MacOS/Clipboard"
 swift scripts/GenerateIcon.swift .build/AppIcon.iconset
 iconutil -c icns .build/AppIcon.iconset -o "$bundle/Contents/Resources/AppIcon.icns"
-cat > "$bundle/Contents/Info.plist" <<'PLIST'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-<key>CFBundleExecutable</key><string>Clipboard</string>
-<key>CFBundleIdentifier</key><string>local.clipboard.app</string>
-<key>CFBundleName</key><string>Clipboard</string>
-<key>CFBundleDisplayName</key><string>Clipboard</string>
-<key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleIconFile</key><string>AppIcon</string>
-<key>CFBundleShortVersionString</key><string>0.1.0</string>
-<key>CFBundleVersion</key><string>1</string>
-<key>LSMinimumSystemVersion</key><string>13.0</string>
-<key>LSUIElement</key><true/>
-<key>NSHighResolutionCapable</key><true/>
-<key>NSPrincipalClass</key><string>NSApplication</string>
-</dict></plist>
-PLIST
+cp THIRD_PARTY_NOTICES.md "$bundle/Contents/Resources/THIRD_PARTY_NOTICES.md"
+python3 scripts/configure-bundle.py
+sparkle_framework="$(find .build/artifacts -type d -path '*/macos-*/Sparkle.framework' -print -quit)"
+if [[ -z "$sparkle_framework" ]]; then
+    echo "Sparkle.framework was not found in the resolved package artifacts." >&2
+    exit 1
+fi
+mkdir -p "$bundle/Contents/Frameworks"
+ditto "$sparkle_framework" "$bundle/Contents/Frameworks/Sparkle.framework"
 codesign --force --sign - --identifier local.clipboard.app "$bundle"
-codesign --verify --strict "$bundle"
+codesign --verify --deep --strict "$bundle"
 printf 'Built %s\n' "$bundle"

@@ -23,6 +23,7 @@ import ClipboardPlatform
     @Published var loginEnabled = false
     @Published var loginNeedsApproval = false
     @Published var working = false
+    @Published var canCheckForUpdates = false
     @Published private(set) var retention: HistoryRetention
     @Published var autoPaste: Bool { didSet { defaults.set(autoPaste, forKey: "autoPaste") } }
     @Published var pasteAsPlainText: Bool { didSet { defaults.set(pasteAsPlainText, forKey: "pasteAsPlainText") } }
@@ -30,6 +31,7 @@ import ClipboardPlatform
     let defaults: UserDefaults
     var onAppearance: (() -> Void)?
     var onClose: (() -> Void)?
+    var onCheckForUpdates: (() -> Void)?
     var onCopy: ((Clip, Bool, Bool) -> Void)?
     var onShortcut: ((Shortcut) throws -> Void)?
     private var toastTask: Task<Void, Never>?
